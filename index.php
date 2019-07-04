@@ -1,16 +1,15 @@
 <?php
 
 /**
-        DON'T FORGET CHANGE FOR YOUR EMAIL BELOW IN THE TEST ERROR SEND
-        N'OUBLIEZ PAS DE METTRE VOTRE EMAIL EN DESSOUS DANS LE TEST D'ENVOI
-        php var $to
-
-        AND CHANGE FOR YOUR SPECIFIC SUBJECT BELOW
-        ET METTRE UN SUJET D'EMAIL EN DESSOUS
-        php var $subject
- * 
+ *      DON'T FORGET CHANGE FOR YOUR EMAIL BELOW IN THE TEST ERROR SEND
+ *       N'OUBLIEZ PAS DE METTRE VOTRE EMAIL EN DESSOUS DANS LE TEST D'ENVOI
+ *      php var $to
+ *
+ *        AND CHANGE FOR YOUR SPECIFIC SUBJECT BELOW
+ *        ET METTRE UN SUJET D'EMAIL EN DESSOUS
+ *        php var $subject
+ *
  */
-
 
 /**
  * BEGIN / DEBUT
@@ -28,7 +27,7 @@ function filterName($field)
     if (filter_var($field, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => "/^[a-zA-Z\s]+$/")))) {
         return $field;
     } else {
-        return FALSE;
+        return false;
     }
 }
 function filterEmail($field)
@@ -42,7 +41,7 @@ function filterEmail($field)
     if (filter_var($field, FILTER_VALIDATE_EMAIL)) {
         return $field;
     } else {
-        return FALSE;
+        return false;
     }
 }
 function filterString($field)
@@ -53,7 +52,7 @@ function filterString($field)
     if (!empty($field)) {
         return $field;
     } else {
-        return FALSE;
+        return false;
     }
 }
 /**
@@ -63,23 +62,23 @@ function filterString($field)
 
 /**
  * TRANSLATE VAR
- * TRADUCTION VARIABLE 
- * 
+ * TRADUCTION VARIABLE
+ *
  */
 
 //Select your language
 //Selection de la langue
 // fr / en
-if (isset($_GET['lang']) && $_GET['lang'] == "en")
+if (isset($_GET['lang']) && $_GET['lang'] == "en") {
     $lang = "en";
-else
+} else {
     $lang = "fr";
+}
 
 // first, we don't show modals
-// Nous n'affichons de base pas les modals 
-$modal=false;
-$modal_error=false;
-
+// Nous n'affichons de base pas les modals
+$modal = false;
+$modal_error = false;
 
 //Content and errors are changed according to language
 //On change le contenu et les erreurs selon la langue
@@ -116,7 +115,7 @@ $content["fr"]["error_email_empty_submit"] = "Veuillez entrer votre adresse e-ma
 $content["fr"]["error_email_nonvalid_submit"] = "Veuillez entrer une adresse e-mail valide.";
 $content["fr"]["error_message_empty_submit"] = "Veuillez entrer votre message.";
 $content["fr"]["error_message_nonvalid_submit"] = "Veuillez entrer un message valide.";
-
+$content["fr"]["error_send_message"] = "Problème avec le service d'envoi de message";
 
 $content["en"]["modal_button"] = "Close";
 $content["en"]["modal_message"] = "Your message has been sent successfully.";
@@ -129,8 +128,7 @@ $content["en"]["error_email_empty_submit"] = "Please enter your email address.";
 $content["en"]["error_email_nonvalid_submit"] = "Please enter a valid email address.";
 $content["en"]["error_message_empty_submit"] = "Please enter your comment.";
 $content["en"]["error_message_nonvalid_submit"] = "Please enter a valid comment.";
-
-
+$content["en"]["error_send_message"] = "Problem with the mail service";
 //We test if the form is submitted
 //On test si le formulaire a été envoyé
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -140,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $nameErr = $content[$lang]["error_name_empty_submit"];
     } else {
         $name = filterName($_POST["contact_name"]);
-        if ($name == FALSE) {
+        if ($name == false) {
             $nameErr = $content[$lang]["error_name_nonvalid_submit"];
         }
     }
@@ -150,11 +148,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $emailErr = $content[$lang]["error_email_empty_submit"];
     } else {
         $email = filterEmail($_POST["contact_email"]);
-        if ($email == FALSE) {
+        if ($email == false) {
             $emailErr = $content[$lang]["error_email_empty_submit"];
         }
     }
-    
 
     // Validate message
     // Validation du message
@@ -162,7 +159,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $messageErr = $content[$lang]["error_message_empty_submit"];
     } else {
         $message = filterString($_POST["contact_message"]);
-        if ($message == FALSE) {
+        if ($message == false) {
             $messageErr = $content[$lang]["error_message_empty_submit"];
         }
     }
@@ -176,8 +173,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // N'OUBLIEZ PAS DE METTRE VOTRE EMAIL ICI
         // Recipient email address
         // Votre adresse mail
-        $to = 'webmaster@gmail.com';
-
+        $to = 'brahim.relid@gmail.com';
 
         //CHANGE FOR YOUR SPECIFIC SUBJECT
         //METTRE UN SUJET D'EMAIL
@@ -186,30 +182,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Create email headers
         $headers = 'From: ' . $email . "\r\n" .
-            'Reply-To: ' . $email . "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
+        'Reply-To: ' . $email . "\r\n" .
+        'X-Mailer: PHP/' . phpversion();
 
         //if tel is set, we add it in the message
         //si il y a le tel, on l'ajout à message
-        if(!empty($_POST["contact_tel"]))
-        {
+        if (!empty($_POST["contact_tel"])) {
             $tel = filterString($_POST["contact_tel"]);
-            $message.=" <br/>Tel :".$tel;
+            $message .= " <br/>Tel :" . $tel;
         }
-            
 
         // Sending email
         //envoi de l'email
         if (mail($to, $subject, $message, $headers)) {
             $modal = true;
+        } else {
+            //if we've got a send problem we see this message
+            //si on a un problème d'envoi, on affiche ce message
+            $nameErr = $content[$lang]["error_send_message"];
+            $modal_error = true;
         }
+
     } else {
         //Else we show error modal
         //Sinon on montre la modal d'erreur
         $modal_error = true;
     }
 }
-
 
 // Active for try modals
 // Activer pour essayer la modals
@@ -321,15 +320,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <div class="modal-body">
                     <?php
-                    if (!empty($nameErr))
-                        echo $nameErr . " <br />";
+if (!empty($nameErr)) {
+    echo $nameErr . " <br />";
+}
 
-                    if (!empty($emailErr))
-                        echo $emailErr . " <br />";
+if (!empty($emailErr)) {
+    echo $emailErr . " <br />";
+}
 
-                    if (!empty($messageErr))
-                        echo $messageErr . " <br />";
-                    ?>
+if (!empty($messageErr)) {
+    echo $messageErr . " <br />";
+}
+
+?>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" data-dismiss="modal"><?php echo $content[$lang]["modal_button"]; ?></button>
@@ -346,8 +349,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
     <script type="text/javascript">
-        //For more infos How to use jQuery Validation Plugin 
-        //Pour plus d'infos sur l'utilisation de jQuery Validation Plugin 
+        //For more infos How to use jQuery Validation Plugin
+        //Pour plus d'infos sur l'utilisation de jQuery Validation Plugin
         //https://github.com/jquery-validation/jquery-validation
         $.validator.setDefaults({
             submitHandler: function() {
@@ -362,15 +365,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
             <?php
-            if ($modal) {
-                //We open modal if the form has been sent
-                //On ouvre la modal si le formulaire a bien été envoyé
-                ?> $("#send_form_Modal").modal("show"); <?php
-            }else if ($modal_error) {
-                ?> $("#error_form_Modal").modal("show"); <?php
-            } 
+if ($modal) {
+    //We open modal if the form has been sent
+    //On ouvre la modal si le formulaire a bien été envoyé
+    ?> $("#send_form_Modal").modal("show"); <?php
+} else if ($modal_error) {
+    ?> $("#error_form_Modal").modal("show"); <?php
+}
 
-            ?>
+?>
 
 
             //name refers to the input/textarea name
